@@ -1,78 +1,58 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import ru.kata.spring.boot_security.demo.entity.User;
-import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
-import javax.validation.Valid;
-import java.util.ArrayList;
+
+import java.util.List;
 
 @Controller
-@RequestMapping()
+@RequestMapping("/admin")
 public class AdminController {
 
     private final UserService userService;
-    private final RoleService roleService;
 
-    public AdminController(UserService userService, RoleService roleService) {
+    @Autowired
+    public AdminController(UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
     }
 
-    @GetMapping("admin")
-    public String pageForAdmin(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+    @RequestMapping
+    public String showAllUser(Model model) {
+        List<User> allUsers = userService.getAllUsers();
+        model.addAttribute("users", allUsers);
         return "users";
     }
 
-    @GetMapping("admin/new")
-    public String pageCreateUser(@ModelAttribute("user") User user, Model model) {
-        model.addAttribute("listRoles",roleService.getAllRoles());
-        return "create";
+    @RequestMapping("/add")
+    public String add(Model model) {
+        User user = new User();
+        model.addAttribute("user", user);
+        return "user-edit";
     }
 
-    @PostMapping("admin/new")
-    public String pageCreate(@ModelAttribute("user")
-                             @Valid User user, BindingResult bindingResult,
-                             @RequestParam("listRoles") ArrayList<Long> roles) {
-        if (bindingResult.hasErrors()) {
-            return "create";
-        }
-        if (userService.getUserByLogin(user.getUsername()) != null) {
-            bindingResult.addError(new FieldError("username", "username",
-                    String.format("User with name \"%s\" is already exist!", user.getUsername())));
-            return "create";
-        }
-        user.setRoles(roleService.findByIdRoles(roles));
-        userService.addUser(user);
+    @RequestMapping(method = RequestMethod.POST, value = "/edit")
+    public String createOrUpdateUser(@ModelAttribute User user) {
+        userService.saveUser(user);
         return "redirect:/admin";
     }
 
-    @DeleteMapping("admin/delete/{id}")
-    public String pageDelete(@PathVariable("id") long id) {
-        userService.removeUser(id);
-        return "redirect:/admin";
+    @RequestMapping("/edit/{id}")
+    public String editUser(@PathVariable(value = "id") Long id, Model model) {
+        User user = userService.getById(id);
+        model.addAttribute("user", user);
+        return "user-edit";
     }
 
-    @GetMapping("admin/edit/{id}")
-    public String pageEditUser(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user",userService.getUserById(id));
-        model.addAttribute("listRoles", roleService.getAllRoles());
-        return "edit";
-    }
-
-    @PutMapping("admin/edit")
-    public String pageEdit(@Valid User user, BindingResult bindingResult,
-                           @RequestParam("listRoles") ArrayList<Long>roles) {
-        if (bindingResult.hasErrors()) {
-            return "edit";
-        }
-        user.setRoles(roleService.findByIdRoles(roles));
-        userService.updateUser(user);
+    @RequestMapping(value = "/delete/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        userService.delete(id);
         return "redirect:/admin";
     }
 }
