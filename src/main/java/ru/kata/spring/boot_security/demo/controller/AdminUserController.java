@@ -10,19 +10,20 @@ import ru.kata.spring.boot_security.demo.service.UserServiceImp;
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/adminUser")
+public class AdminUserController {
     private final UserServiceImp userServiceImp;
 
     @Autowired
-    public UserController(UserServiceImp userServiceImp) {
+    public AdminUserController(UserServiceImp userServiceImp) {
         this.userServiceImp = userServiceImp;
     }
 
     @GetMapping
     public String loadByUser(ModelMap model, Principal principal) {
         model.addAttribute("user", userServiceImp.loadUserByUsername(principal.getName()));
-        return "user";
+        return "adminUser";
     }
 
 }
+
