@@ -4,24 +4,36 @@ import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
 
+    @Override
+    public String toString() {
+        return "Role{" +
+                "name='" + name + '\'' + id +
+                '}';
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "role", unique = true)
-    private String role;
+    @Column
+    private String name;
 
-    public Role(String role) {
-        this.role = role;
+    public Role(){};
+
+    public Role(int id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
-    public Role() {
-
+    @Override
+    public String getAuthority() {
+        return getName();
     }
 
     public int getId() {
@@ -32,28 +44,24 @@ public class Role implements GrantedAuthority {
         this.id = id;
     }
 
-    @Override
-    public String getAuthority() {
-        return role;
+    public String getName() {
+        return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Role role1 = (Role) o;
-        return id == role1.id && role.equals(role1.role);
+        Role role = (Role) o;
+        return getId() == role.getId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, role);
+        return Objects.hash(getId());
     }
-
-    @Override
-    public String toString() {
-        return role.replace("ROLE_", "");
-    }
-
 }

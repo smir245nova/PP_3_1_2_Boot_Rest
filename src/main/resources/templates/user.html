@@ -1,66 +1,96 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
-<meta charset="UTF-8">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-    <title>Spring Security Example</title>
+    <title>User page</title>
 </head>
 <body>
-<!--шапка-->
-<div class="container" style="max-width: 100%">
-    <div class="row navbar navbar-dark bg-dark">
-        <div class="col">
-            <b class="text-white" th:utext="${user.getEmail()}"></b>
-            <span class="text-white" th:utext="' with roles: '"></span>
-            <span class="text-white" th:each="roles : ${user.getRoles()}" th:utext="${roles.toString()}+'   '"></span>
+<!--сверху-->
+<nav class="navbar navbar-dark bg-dark">
+    <span class="navbar-brand mb-0">
+        <!--мэйл с ролью-->
+        <strong><a th:text="${user.getUsername()}">...</a></strong>
+        <span class="text-start">with roles:
+            <a th:each="role : ${user.getRoles()}" th:text="${role}"></a>
+        </span>
+    </span>
+    <!--выйти-->
+    <ul class="navbar-nav px-4">
+        <div class="nav-item text-nowrap">
+            <a class="nav-link" href="/login">Logout</a>
         </div>
-        <div class="col-1"><a class="nav-link active text-white-50" href="/logout">Logout</a></div>
+    </ul>
+</nav>
+<div class="container-fluid bg-light ">
+    <div class="row">
+        <div class="col-2 vh-100 bg-white mt-3 p-0">
+
+            <div class="nav flex-column nav-pills " id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <ul class="nav flex-column">
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a href="#" class="nav-link  placeholder ms-0 me-0 w-100 text start"
+                           th:href="@{/admin}">Admin</a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('USER')">
+                        <a href="#" class="nav-link active ms-0 me-0 w-100 text start"
+                           th:href="@{/user}">User</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--центральная таблица-->
+        <div class="col mt-3 ml-3">
+            <div class="tab-content">
+                <h1>User information-page</h1>
+                <header class="p-3 table-header rounded-top border"><h4>About user</h4></header>
+                <div class="p-4 bg-white border border-top-0 rounded-bottom">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td th:utext="${user.getId()}">...</td>
+                            <td th:utext="${user.getName()}">...</td>
+                            <td th:utext="${user.getLastname()}">...</td>
+                            <td th:utext="${user.getAge()}">...</td>
+                            <td th:utext="${user.getUsername()}">...</td>
+                            <td>
+                                <div th:each="role : ${user.getRoles()}">
+                                    <div th:utext="${role.getSimpleName()}"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
-<div class="container h-100 d-inline-block" style="max-width: 100%">
-    <div class="row" style="height: 120vh">
-        <div class="col-2 pt-3 pl-0 pr-0">
-            <nav class="nav flex-column nav-pills">
-                <a class="nav-link active" href="/user">User</a>
-            </nav>
-        </div>
-        <div class="col-10 bg-light pt-3 pl-0 pr-0 ">
-            <div class="container">
-                <h1>User information-page</h1>
-                <div class="card">
-                    <div class="bg-light p-2 pl-4 font-weight-bold"><h5>About user</h5></div>
-                    <div class="card-block p-3">
-                        <table class="table table-striped">
-                            <tr>
-                                <th>Id</th>
-                                <th>Name</th>
-                                <th>Surname</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                            </tr>
-                            <tr th:object="${user}">
-                                <td th:text="${user.getId()}"></td>
-                                <td th:text="${user.getName()}">Name</td>
-                                <td th:text="${user.getSurname()}">Surname</td>
-                                <td th:text="${user.getEmail()}">Email</td>
-                                <td th:text="${user.getPhone()}">Phone</td>
-                                <td><span th:each="roles : ${user.getRoles()}"
-                                          th:utext="${roles.toString()}+' '">Role</span></td>
-                            </tr>
-                        </table>
-                        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                                integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-                                crossorigin="anonymous"></script>
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-                                integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-                                crossorigin="anonymous"></script>
-                        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                                crossorigin="anonymous"></script>
-  </body>
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
 </html>

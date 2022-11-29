@@ -4,54 +4,67 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    final SuccessUserHandler successUserHandler;
-    final UserDetailsService userService;
+    private final LoginSuccessHandler successUserHandler;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public WebSecurityConfig(SuccessUserHandler successUserHandler, @Qualifier("userServiceImp") UserDetailsService userService, PasswordEncoder passwordEncoder) {
+    public WebSecurityConfig(LoginSuccessHandler successUserHandler, @Qualifier("PasswordEncoder") PasswordEncoder passwordEncoder,
+                             @Qualifier("UserDetailsService") UserDetailsService userDetailsService) {
         this.successUserHandler = successUserHandler;
-        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
     }
 
-    @Bean
-    public static PasswordEncoder bCryptPasswordEncoder() {
-
-        return new BCryptPasswordEncoder(12);
-    }
-
+    //Для аутентификации и авторизации пользователей, используется только для веб-безопасности
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/login", "/").permitAll()
-                .antMatchers("/user/**").hasAnyRole("USER", "ADMIN") //прописываем доступ для юрл /user/**
-                .antMatchers("/admin/**").hasRole("ADMIN") //прописываем доступ для юрл /admin/**
-                .anyRequest().authenticated() // все запросы должны быть авторизованы и аутентифицированы
+                .antMatchers("/", "/login").permitAll()
+                //защищенные URL
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/user/**").hasAnyRole("ADMIN", "USER")
+                .anyRequest()
+                //каждый запрос должен быть аутентиф-н
+                .authenticated()
                 .and()
-                .formLogin() // задаю форму для ввода логина-пароля, по дефолту это "/login"
+                .formLogin()
                 .successHandler(successUserHandler)
-                .permitAll() // доступно всем
+                .loginPage("/login")
+                .permitAll()
                 .and()
-                .logout().permitAll(); //
+                .logout()
+                .permitAll();
     }
 
-    @Autowired
-    public void configureGlobalSecurity(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService)
-                .passwordEncoder(bCryptPasswordEncoder());
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(passwordEncoder);
+
     }
 
+    //DaoAuthenticationProvider — это простой поставщик аутентификации, который использует объект доступа к данным (DAO)
+//для извлечения информации о пользователе из реляционной базы данных
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+        return daoAuthenticationProvider;
+    }
 }

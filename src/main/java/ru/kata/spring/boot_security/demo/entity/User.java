@@ -5,48 +5,48 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "users")
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "surname")
-    private String surname;
+    @Column(name = "lastname")
+    private String lastname;
 
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "phone")
-    private Integer phone;
+    @Column(name = "login")
+    private String username;
 
     @Column(name = "password")
     private String password;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    Set<Role> roles;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinTable(name = "users_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private List<Role> roles;
 
-    public User(String name, String surname, String email, Integer phone, String password, Set<Role> roles) {
+    public User() {
+    }
+
+    public User(String name, String lastname, String username, String password, List<Role> roles) {
         this.name = name;
-        this.surname = surname;
-        this.email = email;
-        this.phone = phone;
+        this.lastname = lastname;
+        this.username = username;
         this.password = password;
         this.roles = roles;
     }
 
-    public User() {
-
-    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -62,45 +62,41 @@ public class User implements UserDetails {
         this.name = name;
     }
 
-    public String getSurname() {
-        return surname;
+    public String getLastName() {
+        return lastname;
     }
 
-    public String getEmail() {
-        return email;
+    public void setLastName(String lastName) {
+        this.lastname = lastName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getLastname() {
+        return lastname;
     }
 
-    public Integer getPhone() {
-        return phone;
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
     }
 
-    public void setPhone(Integer phone) {
-        this.phone = phone;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(List<Role> roles) {
         this.roles = roles;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles;
+        return getRoles();
     }
 
     @Override
@@ -110,7 +106,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override
@@ -136,27 +132,13 @@ public class User implements UserDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof User)) return false;
         User user = (User) o;
-        return id == user.id && name.equals(user.name) && surname.equals(user.surname) && email.equals(user.email) && phone.equals(user.phone) && password.equals(user.password) && roles.equals(user.roles);
+        return getId() == user.getId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, surname, email, phone, password, roles);
+        return Objects.hash(getId());
     }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", email='" + email + '\'' +
-                ", phone=" + phone +
-                ", password='" + password + '\'' +
-                ", roles=" + roles +
-                '}';
-    }
-
 }
