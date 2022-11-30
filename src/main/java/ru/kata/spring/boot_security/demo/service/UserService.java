@@ -10,9 +10,10 @@ public interface UserService {
 
     void deleteUserById(int id);
 
-    void updateUser(User user, String[] roles);
 
-    void addUser(User user, String[] roles);
+    void updateUser(User user);
+
+    void addUser(User user);
 
     User getUserById(int id);
 

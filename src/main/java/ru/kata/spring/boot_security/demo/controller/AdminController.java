@@ -32,9 +32,9 @@ public class AdminController {
         model.addAttribute("newUser", new User());
         return "admin";
     }
+}
 
-
-    @PatchMapping("/update/{id}")
+    /* @PatchMapping("/update/{id}")
     public String updateUser(User user,@PathVariable("id") int id, @RequestParam String[] roles) {
         userService.updateUser(user, roles);
         return "redirect:/admin";
@@ -53,4 +53,4 @@ public class AdminController {
         userService.addUser(user, roles);
         return "redirect:/admin";
     }
-}
+}*/

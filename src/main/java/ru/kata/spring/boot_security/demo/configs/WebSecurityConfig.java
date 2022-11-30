@@ -21,7 +21,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
 
     @Autowired
-    public WebSecurityConfig(LoginSuccessHandler successUserHandler, @Qualifier("PasswordEncoder") PasswordEncoder passwordEncoder,
+    public WebSecurityConfig(LoginSuccessHandler successUserHandler,
+                             @Qualifier("PasswordEncoder") PasswordEncoder passwordEncoder,
                              @Qualifier("UserDetailsService") UserDetailsService userDetailsService) {
         this.successUserHandler = successUserHandler;
         this.passwordEncoder = passwordEncoder;
@@ -32,8 +33,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/login").permitAll()
+                .antMatchers("/","/static/**", "/api/**").permitAll()
                 //защищенные URL
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasAnyRole("ADMIN", "USER")
@@ -55,11 +57,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder);
-
     }
 
     //DaoAuthenticationProvider — это простой поставщик аутентификации, который использует объект доступа к данным (DAO)
-//для извлечения информации о пользователе из реляционной базы данных
+//для извлечения информации о пользователе из реляционной БД
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();

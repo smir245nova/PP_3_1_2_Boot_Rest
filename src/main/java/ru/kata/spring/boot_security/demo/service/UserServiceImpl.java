@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.entity.Role;
@@ -43,22 +44,23 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void updateUser(User user, @RequestParam String[] roles1) {
+    public void updateUser(User user) {
         List<Role> listroles = new ArrayList<>();
-        for (String s : roles1) {
-            listroles.add(roleService.getByName(s));
+        for (Role role : user.getRoles()) {
+            listroles.add(roleService.getByName(role.getName()));
         }
         user.setRoles(listroles);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userDao.updateUser(user);
     }
 
     @Transactional
     @Override
-    public void addUser(User user, @RequestParam String[] roles1) {
+    public void addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         List<Role> listroles = new ArrayList<>();
-        for (String s : roles1) {
-            listroles.add(roleService.getByName(s));
+        for (Role role : user.getRoles()) {
+            listroles.add(roleService.getByName(role.getName()));
         }
         user.setRoles(listroles);
         userDao.addUser(user);
