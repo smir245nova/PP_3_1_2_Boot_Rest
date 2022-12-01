@@ -34,23 +34,4 @@ public class AdminController {
     }
 }
 
-    /* @PatchMapping("/update/{id}")
-    public String updateUser(User user,@PathVariable("id") int id, @RequestParam String[] roles) {
-        userService.updateUser(user, roles);
-        return "redirect:/admin";
-    }
 
-
-    @DeleteMapping("/delete/{id}")
-    public String delete(@PathVariable("id") int id) {
-        userService.deleteUserById(id);
-        return "redirect:/admin";
-    }
-
-
-    @PostMapping("/save")
-    public String create(@ModelAttribute("user") User user, @RequestParam String[] roles) {
-        userService.addUser(user, roles);
-        return "redirect:/admin";
-    }
-}*/
