@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
@@ -12,7 +13,7 @@ import java.util.List;
 //управляет рест запросами и ответами
 @RestController
 @RequestMapping("/api")
-class MyRestController {
+public class MyRestController {
 
     private final UserService userService;
     private final RoleService roleService;
@@ -23,22 +24,26 @@ class MyRestController {
         this.roleService = roleService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     private List<User> showAllUsers() {
         return userService.getAllUser();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users/{id}")
     private User getUser(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     private User addNew(@RequestBody User user) {
         userService.addUser(user);
         return user;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/users/{id}")
     private User update(@RequestBody User user, @PathVariable("id") int id) {
         userService.updateUser(user);
@@ -46,6 +51,7 @@ class MyRestController {
         return updatedUser;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{id}")
     private void delete(@PathVariable("id") int id) {
         userService.deleteUserById(id);
