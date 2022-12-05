@@ -16,12 +16,10 @@ import java.util.List;
 public class MyRestController {
 
     private final UserService userService;
-    private final RoleService roleService;
 
     @Autowired
-    private MyRestController(UserService userService, RoleService roleService) {
+    private MyRestController(UserService userService) {
         this.userService = userService;
-        this.roleService = roleService;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
