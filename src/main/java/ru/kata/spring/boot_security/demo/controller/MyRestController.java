@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.entity.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
@@ -20,7 +21,10 @@ public class MyRestController {
     @Autowired
     private MyRestController(UserService userService) {
         this.userService = userService;
+
     }
+
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
@@ -56,7 +60,8 @@ public class MyRestController {
     }
 
     @GetMapping("/users/current_user")
-    private User showCurrentUser(Principal principal) {
+    private User showCurrentUser(Principal principal, Model model) {
+        model.addAttribute("user", userService.getUserByName(principal.getName()));
         User currentUser = userService.getUserByName(principal.getName());
         return currentUser;
     }
